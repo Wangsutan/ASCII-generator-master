@@ -6,7 +6,6 @@ import argparse
 import cv2
 import numpy as np
 from typing import Tuple
-from PIL import Image, ImageFont
 
 
 def get_args() -> argparse.Namespace:
@@ -34,7 +33,7 @@ def get_args() -> argparse.Namespace:
 
 
 def draw(
-    image_input: str, image_output: str, char_list: str, num_cols: int, scale: float
+    image_input: str, image_output: str, num_cols: int, char_list: str, scale: float
 ) -> None:
     image: np.ndarray = cv2.cvtColor(cv2.imread(image_input), cv2.COLOR_BGR2GRAY)
     cell_width, cell_height, num_rows, num_cols = get_shape_parameters(
@@ -101,8 +100,8 @@ if __name__ == "__main__":
     opt = get_args()
     image_input: str = opt.input
     image_output: str = opt.output
-    char_list: str = set_char_list(opt.mode)
     num_cols: int = opt.num_cols
+    char_list: str = set_char_list(opt.mode)
     scale: float = 2
 
-    draw(image_input, image_output, char_list, num_cols, scale)
+    draw(image_input, image_output, num_cols, char_list, scale)

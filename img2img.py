@@ -41,15 +41,13 @@ def draw(
     image_input: str,
     image_output: str,
     backgroudnd_color: str,
-    language: str,
-    mode: str,
     num_cols: int,
+    char_list: str,
+    font: ImageFont,
+    sample_character: str,
+    scale: float,
 ) -> None:
     bg_code: int = set_background_code(backgroudnd_color)
-    char_list, font, sample_character, scale = get_data(language, mode)
-    if any(v is None for v in [char_list, font, sample_character, scale]):
-        print("Error: Unable to load data for the specified language and mode.")
-        return
 
     image: np.ndarray = cv2.cvtColor(cv2.imread(image_input), cv2.COLOR_BGR2GRAY)
     height, width = image.shape
@@ -59,7 +57,7 @@ def draw(
 
     char_width, char_height = get_char_shape(sample_character, font)
     out_width: int = char_width * num_cols
-    out_height: int = scale * char_height * num_rows
+    out_height: int = int(scale * char_height * num_rows)
     out_image = Image.new("L", (out_width, out_height), bg_code)
     draw = ImageDraw.Draw(out_image)
 
@@ -100,4 +98,22 @@ if __name__ == "__main__":
     language: str = opt.language
     mode: str = opt.mode
     num_cols: int = opt.num_cols
-    draw(image_input, image_output, backgroudnd_color, language, mode, num_cols)
+
+    try:
+        char_list, font, sample_character, scale = get_data(language, mode)
+        if any(v is None for v in [char_list, font, sample_character, scale]):
+            raise ValueError
+    except ValueError:
+        print("Error: Invalid language or mode.")
+        exit(1)
+
+    draw(
+        image_input,
+        image_output,
+        backgroudnd_color,
+        num_cols,
+        char_list,
+        font,
+        sample_character,
+        scale,
+    )
