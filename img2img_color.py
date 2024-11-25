@@ -2,86 +2,60 @@
 @author: Viet Nguyen <nhviet1009@gmail.com>
 """
 
-import argparse
-
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw, ImageOps
-from utils import get_data
+from PIL import ImageDraw, ImageFont
+from utils import (
+    get_args,
+    get_data,
+    get_shape_parameters,
+    get_partial_image,
+    calc_avg_color,
+    crop_image,
+    get_char_by_color,
+)
+from img2img import get_char_shape, get_out_image
+from typing import Tuple
 
 
-def get_args():
-    parser = argparse.ArgumentParser("Image to ASCII")
-    parser.add_argument(
-        "--input", type=str, default="data/input.jpg", help="Path to input image"
-    )
-    parser.add_argument(
-        "--output", type=str, default="data/output.jpg", help="Path to output text file"
-    )
-    parser.add_argument("--language", type=str, default="english")
-    parser.add_argument("--mode", type=str, default="standard")
-    parser.add_argument(
-        "--background",
-        type=str,
-        default="black",
-        choices=["black", "white"],
-        help="background's color",
-    )
-    parser.add_argument(
-        "--num_cols",
-        type=int,
-        default=300,
-        help="number of character for output's width",
-    )
-    parser.add_argument("--scale", type=int, default=2, help="upsize output")
-    args = parser.parse_args()
-    return args
+def draw(
+    image_input: str,
+    image_output: str,
+    background_color: str,
+    num_cols: int,
+    char_list: str,
+    font: ImageFont.FreeTypeFont,
+    sample_character: str,
+    scale: float,
+) -> None:
+    bg_code = set_background_codes(backgroudnd_color)
 
-
-def main(opt):
-    if opt.background == "white":
-        bg_code = (255, 255, 255)
-    else:
-        bg_code = (0, 0, 0)
-    char_list, font, sample_character, scale = get_data(opt.language, opt.mode)
     num_chars = len(char_list)
-    num_cols = opt.num_cols
-    image = cv2.imread(opt.input, cv2.IMREAD_COLOR)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    height, width, _ = image.shape
-    cell_width = width / opt.num_cols
-    cell_height = scale * cell_width
-    num_rows = int(height / cell_height)
-    if num_cols > width or num_rows > height:
-        print("Too many columns or rows. Use default setting")
-        cell_width = 6
-        cell_height = 12
-        num_cols = int(width / cell_width)
-        num_rows = int(height / cell_height)
+    image: np.ndarray = cv2.cvtColor(
+        cv2.imread(image_input, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB
+    )
+    image_height, image_width = image.shape[:2]
+    cell_width, cell_height, num_rows, num_cols = get_shape_parameters(
+        image_height, image_width, num_cols, scale
+    )
 
-    draw = ImageDraw.Draw(Image.new("RGB", (100, 100)))
-    bbox = draw.textbbox((0, 0), sample_character, font=font)
-    char_width = bbox[2] - bbox[0]
-    char_height = bbox[3] - bbox[1]
-
-    out_width = char_width * num_cols
-    out_height = scale * char_height * num_rows
-    out_image = Image.new("RGB", (out_width, out_height), bg_code)
+    char_width, char_height = get_char_shape(sample_character, font)
+    out_image = get_out_image(
+        char_width, char_height, num_cols, num_rows, scale, "RGB", bg_code
+    )
     draw = ImageDraw.Draw(out_image)
+
     for i in range(num_rows):
         for j in range(num_cols):
-            partial_image = image[
-                int(i * cell_height) : min(int((i + 1) * cell_height), height),
-                int(j * cell_width) : min(int((j + 1) * cell_width), width),
-                :,
-            ]
-            partial_avg_color = np.sum(np.sum(partial_image, axis=0), axis=0) / (
-                cell_height * cell_width
+            partial_image: np.ndarray = get_partial_image(
+                image, cell_width, cell_height, i, j
             )
-            partial_avg_color = tuple(partial_avg_color.astype(np.int32).tolist())
-            char = char_list[
-                min(int(np.mean(partial_image) * num_chars / 255), num_chars - 1)
-            ]
+            partial_avg_color: Tuple[int, int, int] = calc_avg_color(
+                partial_image, cell_width, cell_height
+            )
+            char: str = get_char_by_color(
+                char_list, num_chars, float(np.mean(partial_avg_color))
+            )
             draw.text(
                 (j * char_width, i * char_height),
                 char,
@@ -89,14 +63,36 @@ def main(opt):
                 font=font,
             )
 
-    if opt.background == "white":
-        cropped_image = ImageOps.invert(out_image).getbbox()
-    else:
-        cropped_image = out_image.getbbox()
-    out_image = out_image.crop(cropped_image)
-    out_image.save(opt.output)
+    out_image = crop_image(out_image, background_color)
+    out_image.save(image_output)
+
+
+def set_background_codes(background_color: str) -> Tuple[int, int, int]:
+    return (255, 255, 255) if background_color == "white" else (0, 0, 0)
 
 
 if __name__ == "__main__":
     opt = get_args()
-    main(opt)
+    image_input: str = opt.input
+    image_output: str = opt.output
+    backgroudnd_color: str = opt.background
+    language: str = opt.language
+    mode: str = opt.mode
+    num_cols: int = opt.num_cols
+
+    try:
+        char_list, font, sample_character, scale = get_data(language, mode)
+    except ValueError:
+        print("Error: Invalid language or mode.")
+        exit(1)
+
+    draw(
+        image_input,
+        image_output,
+        backgroudnd_color,
+        num_cols,
+        char_list,
+        font,
+        sample_character,
+        scale,
+    )

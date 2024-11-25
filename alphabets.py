@@ -59,7 +59,7 @@ languages: Dict[str, Dict[str, Any]] = {
         "chars": {
             "standard": "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzàÀáÁâÂãÃçÇéÉêÊíÍóÓôÔõÕúÚ"
         },
-        "font_path": "fonts/DejaVuSansMono-Bold.ttf",
+        "font_path": "fonts/Deimage_outputjaVuSansMono-Bold.ttf",
         "sample_char": "A",
         "size": 20,
         "scale": 2,
