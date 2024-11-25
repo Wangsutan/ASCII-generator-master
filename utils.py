@@ -110,7 +110,6 @@ def sort_chars_incremental(
 
 
 def get_char_shape(sample_char: str, font: ImageFont.FreeTypeFont) -> Tuple[int, int]:
-    """set the shape of a image without characters."""
     draw = ImageDraw.Draw(Image.new("RGB", (100, 100)))
     bbox = draw.textbbox((0, 0), sample_char, font=font)
     char_width = int(bbox[2] - bbox[0])
