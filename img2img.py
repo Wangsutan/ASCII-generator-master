@@ -15,6 +15,7 @@ from utils import (
     get_out_image,
     calc_avg_gray,
     crop_image,
+    set_background_code,
 )
 
 
@@ -56,10 +57,6 @@ def draw(
 
     out_image = crop_image(out_image, background_color)
     out_image.save(image_output)
-
-
-def set_background_code(background_color: str) -> int:
-    return 255 if background_color == "white" else 0
 
 
 if __name__ == "__main__":

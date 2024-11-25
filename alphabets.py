@@ -5,7 +5,7 @@ languages: Dict[str, Dict[str, Any]] = {
     "general": {
         "chars": {
             "simple": "@%#*+=-:. ",
-            "complex": "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
+            "complex": "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ",
         },
         "font_path": "fonts/DejaVuSansMono-Bold.ttf",
         "sample_char": "A",

@@ -216,6 +216,14 @@ def crop_image(image: Image.Image, background_color: str) -> Image.Image:
     return image.crop(cropped_image)
 
 
+def set_background_code(background_color: str) -> int:
+    return 255 if background_color == "white" else 0
+
+
+def set_background_codes(background_color: str) -> Tuple[int, int, int]:
+    return (255, 255, 255) if background_color == "white" else (0, 0, 0)
+
+
 if __name__ == "__main__":
     try:
         print(get_data("chinese", "interesting"))

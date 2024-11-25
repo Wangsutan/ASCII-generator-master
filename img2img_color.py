@@ -13,6 +13,7 @@ from utils import (
     calc_avg_color,
     crop_image,
     get_char_by_color,
+    set_background_codes,
 )
 from img2img import get_char_shape, get_out_image
 from typing import Tuple
@@ -28,9 +29,8 @@ def draw(
     sample_character: str,
     scale: float,
 ) -> None:
-    bg_code = set_background_codes(backgroudnd_color)
+    bg_code: Tuple[int, int, int] = set_background_codes(backgroudnd_color)
 
-    num_chars = len(char_list)
     image: np.ndarray = cv2.cvtColor(
         cv2.imread(image_input, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB
     )
@@ -54,7 +54,7 @@ def draw(
                 partial_image, cell_width, cell_height
             )
             char: str = get_char_by_color(
-                char_list, num_chars, float(np.mean(partial_avg_color))
+                char_list, len(char_list), float(np.mean(partial_avg_color))
             )
             draw.text(
                 (j * char_width, i * char_height),
@@ -65,10 +65,6 @@ def draw(
 
     out_image = crop_image(out_image, background_color)
     out_image.save(image_output)
-
-
-def set_background_codes(background_color: str) -> Tuple[int, int, int]:
-    return (255, 255, 255) if background_color == "white" else (0, 0, 0)
 
 
 if __name__ == "__main__":
