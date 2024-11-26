@@ -1,3 +1,8 @@
+"""
+@author: Viet Nguyen <nhviet1009@gmail.com>
+@author: Wang Sutan <wangsutan@163.com>
+"""
+
 import argparse
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw, ImageOps
